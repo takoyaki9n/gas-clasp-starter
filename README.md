@@ -1,4 +1,7 @@
 # gas-clasp-starter
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/howdy39/gas-clasp-starter.svg)](https://greenkeeper.io/)
+
 A starter template for Google Apps Script by [google/clasp](https://github.com/google/clasp)
 
 ## Article
