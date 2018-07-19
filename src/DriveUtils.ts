@@ -22,9 +22,7 @@ export class DriveUtils {
     return null;
   }
 
-  public static getFileContent(folder: Folder, fileName: string): string {
-    return DriveUtils.getFile(folder, fileName)
-      .getBlob()
-      .getDataAsString();
+  public static getFileContentText(file: File): string {
+    return file != null ? file.getBlob().getDataAsString() : '';
   }
 }

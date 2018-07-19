@@ -42,7 +42,7 @@ export class API {
 
   private callAPI(url: string): Object {
     const response = UrlFetchApp.fetch(url, this.params);
-    const data = response.getBlob().getDataAsString();
+    const data = response.getContentText('UTF-8');
     const obj = JSON.parse(data);
     if (response.getResponseCode() !== 200) {
       Logger.log(data);
