@@ -1,5 +1,6 @@
 import Folder = GoogleAppsScript.Drive.Folder;
-import { API } from './API';
+import { API } from './Api';
+import { JobManager } from './JobManager';
 
 declare var global: any;
 
@@ -14,9 +15,6 @@ global.getIksmSession = (folder: Folder): string => {
 };
 
 global.main = (): void => {
-  const folder = global.getScriptFolder();
-  const iksmSession = global.getIksmSession(folder);
-  const api = new API(iksmSession);
-  const response = api.callResults();
-  Logger.log(JSON.stringify(response));
+  const jobManager = new JobManager();
+  jobManager.run();
 };
