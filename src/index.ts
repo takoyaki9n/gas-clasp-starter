@@ -3,16 +3,6 @@ import { API } from './API';
 
 declare var global: any;
 
-global.getScriptFolder = (): Folder => {
-  const scriptId = ScriptApp.getScriptId();
-  const file = DriveApp.getFileById(scriptId);
-  const folders = file.getParents();
-  while (folders.hasNext()) {
-    return folders.next();
-  }
-  return null;
-};
-
 global.getIksmSession = (folder: Folder): string => {
   const files = folder.getFilesByName('iksm_session');
   while (files.hasNext()) {
