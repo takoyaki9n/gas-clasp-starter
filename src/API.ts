@@ -7,7 +7,9 @@ export class API {
 
   static API_RESULTS: string = API.API_BASE + '/results';
 
-  static getResultsUrl(): string { return API.API_RESULTS; }
+  static getResultsUrl(): string {
+    return API.API_RESULTS;
+  }
 
   static getResultUrl(battleNumber: number): string {
     return API.API_RESULTS + '/' + battleNumber.toString();
@@ -53,6 +55,6 @@ export class API {
   }
 
   public callResult(battleNumber: number): Object {
-      return this.callAPI(API.getResultUrl(battleNumber));
+    return this.callAPI(API.getResultUrl(battleNumber));
   }
 }
