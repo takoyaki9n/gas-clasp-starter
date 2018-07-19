@@ -1,11 +1,9 @@
 import URLFetchRequestOptions = GoogleAppsScript.URL_Fetch.URLFetchRequestOptions;
 
 export class API {
-  static APP_BASE: string = 'https://app.splatoon2.nintendo.net';
-
-  static API_BASE: string = API.APP_BASE + '/api';
-
-  static API_RESULTS: string = API.API_BASE + '/results';
+  static APP_BASE = 'https://app.splatoon2.nintendo.net';
+  static API_BASE = API.APP_BASE + '/api';
+  static API_RESULTS = API.API_BASE + '/results';
 
   static getResultsUrl(): string {
     return API.API_RESULTS;
@@ -25,6 +23,7 @@ export class API {
 
   private iksmSession: string;
   private params: URLFetchRequestOptions;
+
   constructor(iksmSession: string) {
     this.iksmSession = iksmSession;
     this.params = this.initParams();

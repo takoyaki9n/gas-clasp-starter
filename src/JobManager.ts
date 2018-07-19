@@ -5,12 +5,13 @@ import { DriveUtils } from './DriveUtils';
 import { API } from './API';
 
 export class JobManager {
-  private static LOCK_FILE_NAME = 'lock.txt';
   private static IKSM_SESSION_FILE_NAME = 'iksm_session';
+  private static LOCK_FILE_NAME = 'lock.txt';
 
   private projectRoot: Folder;
   private lockFile: File;
   private api: API;
+
   constructor() {
     this.projectRoot = DriveUtils.getScriptFolder();
     this.api = this.initApi();
