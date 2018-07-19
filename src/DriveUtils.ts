@@ -1,5 +1,7 @@
 import Folder = GoogleAppsScript.Drive.Folder;
 import File = GoogleAppsScript.Drive.File;
+import FileIterator = GoogleAppsScript.Drive.FileIterator;
+import FolderIterator = GoogleAppsScript.Drive.FolderIterator;
 
 export class DriveUtils {
   public static getScriptFolder(): Folder {
@@ -24,5 +26,12 @@ export class DriveUtils {
 
   public static getFileContentText(file: File): string {
     return file != null ? file.getBlob().getDataAsString() : '';
+  }
+
+  public static forEach(
+    iterator: FileIterator | FolderIterator,
+    fun: (item: File | Folder) => void
+  ): void {
+    while (iterator.hasNext()) fun(iterator.next());
   }
 }
