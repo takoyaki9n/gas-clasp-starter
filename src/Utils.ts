@@ -3,7 +3,7 @@ import File = GoogleAppsScript.Drive.File;
 import FileIterator = GoogleAppsScript.Drive.FileIterator;
 import FolderIterator = GoogleAppsScript.Drive.FolderIterator;
 
-export class DriveUtils {
+export class Utils {
   public static getScriptFolder(): Folder {
     const scriptId = ScriptApp.getScriptId();
     const file = DriveApp.getFileById(scriptId);

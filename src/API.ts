@@ -1,16 +1,16 @@
 import URLFetchRequestOptions = GoogleAppsScript.URL_Fetch.URLFetchRequestOptions;
 
 export class API {
-  static APP_BASE = 'https://app.splatoon2.nintendo.net';
-  static API_BASE = API.APP_BASE + '/api';
-  static API_RESULTS = API.API_BASE + '/results';
+  private static readonly HOST_URL = 'https://app.splatoon2.nintendo.net';
+  private static readonly BASE_URL = API.HOST_URL + '/api';
+  private static readonly RESULTS_URL = API.BASE_URL + '/results';
 
   static getResultsUrl(): string {
-    return API.API_RESULTS;
+    return API.RESULTS_URL;
   }
 
   static getResultUrl(battleNumber: number): string {
-    return API.API_RESULTS + '/' + battleNumber.toString();
+    return API.RESULTS_URL + '/' + battleNumber.toString();
   }
 
   static getFormatedCookie(cookies: Object) {
@@ -21,8 +21,8 @@ export class API {
     return kvs.join('; ');
   }
 
-  private iksmSession: string;
-  private params: URLFetchRequestOptions;
+  private readonly iksmSession: string;
+  private readonly params: URLFetchRequestOptions;
 
   constructor(iksmSession: string) {
     this.iksmSession = iksmSession;
