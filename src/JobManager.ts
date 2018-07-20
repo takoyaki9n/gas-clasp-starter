@@ -8,6 +8,7 @@ import { API } from './API';
 namespace PropetyKeys {
   export const IKSM_SESSION = 'iksm_session';
   export const LOCK = 'lock';
+  export const LATEST = 'latest';
 }
 
 export class JobManager {
@@ -41,9 +42,25 @@ export class JobManager {
     this.properties.deleteProperty(PropetyKeys.LOCK);
   }
 
+  public getLocalLatestBattleNumber(): number {
+    const latest = this.properties.getProperty(PropetyKeys.LATEST);
+    var battleNumber = Number(latest);
+    if (latest != null && !isNaN(battleNumber)) return battleNumber;
+
+    battleNumber = -1;
+    Utils.forEach(this.resultFolder.getFiles(), file => {
+      const name = file.getName();
+      const number = Number(name);
+      if (!isNaN(number)) battleNumber = Math.max(battleNumber, number);
+    });
+    this.properties.setProperty(PropetyKeys.LATEST, battleNumber.toString());
+    return battleNumber;
+  }
+
   public run(): void {
     try {
       if (!this.lock()) return;
+      const latest = this.getLocalLatestBattleNumber();
     } catch (error) {
       Logger.log(JSON.stringify(error));
     }
