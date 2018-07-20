@@ -1,4 +1,5 @@
 import URLFetchRequestOptions = GoogleAppsScript.URL_Fetch.URLFetchRequestOptions;
+import HTTPResponse = GoogleAppsScript.URL_Fetch.HTTPResponse;
 
 export class API {
   private static readonly HOST_URL = 'https://app.splatoon2.nintendo.net';
@@ -39,21 +40,23 @@ export class API {
     };
   }
 
-  private callAPI(url: string): Object {
+  private fetchAPI(url: string): HTTPResponse {
     const response = UrlFetchApp.fetch(url, this.params);
-    const data = response.getContentText('UTF-8');
-    const obj = JSON.parse(data);
     if (response.getResponseCode() !== 200) {
-      Logger.log(data);
+      console.error({
+        url: url,
+        responseCode: response.getResponseCode(),
+        content: response.getContentText('UTF-8')
+      });
     }
-    return obj;
+    return response;
   }
 
-  public callResults(): Object {
-    return this.callAPI(API.getResultsUrl());
+  public fetchResults(): HTTPResponse {
+    return this.fetchAPI(API.getResultsUrl());
   }
 
-  public callResult(battleNumber: number): Object {
-    return this.callAPI(API.getResultUrl(battleNumber));
+  public fetchResult(battleNumber: number): HTTPResponse {
+    return this.fetchAPI(API.getResultUrl(battleNumber));
   }
 }
