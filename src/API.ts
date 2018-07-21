@@ -35,21 +35,12 @@ export class API {
     const headers = { Cookie: API.getFormatedCookie(cookies) };
     return {
       method: 'get',
-      headers: headers,
-      muteHttpExceptions: true
+      headers: headers
     };
   }
 
   private fetchAPI(url: string): HTTPResponse {
-    const response = UrlFetchApp.fetch(url, this.params);
-    if (response.getResponseCode() !== 200) {
-      console.error({
-        url: url,
-        responseCode: response.getResponseCode(),
-        content: response.getContentText('UTF-8')
-      });
-    }
-    return response;
+    return UrlFetchApp.fetch(url, this.params);
   }
 
   public fetchResults(): HTTPResponse {

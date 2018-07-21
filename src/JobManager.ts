@@ -14,6 +14,7 @@ namespace PropetyKeys {
 
 export class JobManager {
   private static RESULTS_FOLDER_NAME = 'results';
+  private static MAX_RESULTS_COUNT = 50;
 
   private readonly root: Folder;
   private readonly properties: Properties;
@@ -55,6 +56,16 @@ export class JobManager {
     throw new Error(Utilities.formatString('Property latest is invalid: %s', latest));
   }
 
+  private getRemoteLatestBattleNumber(): number {
+    const response = this.api.fetchResults();
+    const responseData = JSON.parse(response.getContentText('UTF-8'));
+    const results: Array<any> = responseData.results;
+    results.sort((a, b) => {
+      return b.battle_number - a.battle_number;
+    });
+    return results[0].battle_number;
+  }
+
   private saveResult(response: HTTPResponse, battleNumber): void {
     if (response.getResponseCode() !== 200) return;
 
@@ -69,9 +80,17 @@ export class JobManager {
   public run(): void {
     if (!this.lock()) return;
     try {
-      const battleNumber = this.getLocalLatestBattleNumber() + 1;
-      const response = this.api.fetchResult(battleNumber);
-      this.saveResult(response, battleNumber);
+      const remote = this.getRemoteLatestBattleNumber();
+      const local = this.getLocalLatestBattleNumber();
+      if (remote === local) {
+        console.log('Already up to date.');
+      } else if (remote - local > JobManager.MAX_RESULTS_COUNT) {
+        console.log('Old results seemed to be lost...');
+      } else {
+        const battleNumber = local + 1;
+        const response = this.api.fetchResult(battleNumber);
+        this.saveResult(response, battleNumber);
+      }
     } catch (error) {
       console.error(JSON.stringify(error));
     }
