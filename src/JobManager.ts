@@ -7,8 +7,10 @@ import { API } from './API';
 import { PropetyKeys } from './PropetyKeys';
 
 export class JobManager {
-  private static RESULTS_FOLDER_NAME = 'results';
-  private static MAX_RESULTS_COUNT = 50;
+  private static readonly RESULTS_FOLDER_NAME = 'results';
+  private static readonly MAX_RESULTS_COUNT = 50;
+  private static readonly RESON_CODE_DISCONNECTION = 'playing_frequent_disconnection';
+  private static readonly TEXT_DISCONNECTION = '通信切断';
 
   private readonly root: Folder;
   private readonly properties: Properties;
@@ -45,13 +47,36 @@ export class JobManager {
   }
 
   private getRemoteLatestBattleNumber(): number {
-    const response = this.api.fetchResults();
+    const response = this.api.getResults();
     const responseData = JSON.parse(response.getContentText('UTF-8'));
     const results: Array<any> = responseData.results;
     results.sort((a, b) => {
       return b.battle_number - a.battle_number;
     });
     return Number(results[0].battle_number);
+  }
+
+  private reportDisconnection(response: HTTPResponse) {
+    const result = JSON.parse(response.getContentText('UTF-8'));
+    const members: Array<any> = result.my_team_members.concat(result.other_team_members);
+    const reportee = members.filter(member => {
+      return member.game_paint_point === 0;
+    });
+    reportee.forEach(member => {
+      this.api.postReportAbuse(
+        result,
+        member.player,
+        JobManager.RESON_CODE_DISCONNECTION,
+        JobManager.TEXT_DISCONNECTION
+      );
+      console.log(
+        Utilities.formatString(
+          'Disconnection reported: buttle_number=%s, nickname=%s',
+          result.buttle_number,
+          member.player.nickname
+        )
+      );
+    });
   }
 
   private saveResult(response: HTTPResponse, battleNumber): void {
@@ -86,7 +111,7 @@ export class JobManager {
         return Utils.withLog<null>(null, 'Old results seemed to be lost...');
 
       const battleNumber = local + 1;
-      const response = this.api.fetchResult(battleNumber);
+      const response = this.api.getResult(battleNumber);
       this.saveResult(response, battleNumber);
     });
   }

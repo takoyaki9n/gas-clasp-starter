@@ -5,6 +5,7 @@ export class API {
   private static readonly HOST_URL = 'https://app.splatoon2.nintendo.net';
   private static readonly BASE_URL = API.HOST_URL + '/api';
   private static readonly RESULTS_URL = API.BASE_URL + '/results';
+  private static readonly REPORT_ABUSE_URL = API.BASE_URL + '/report_abuse';
 
   static getResultsUrl(): string {
     return API.RESULTS_URL;
@@ -12,6 +13,10 @@ export class API {
 
   static getResultUrl(battleNumber: number): string {
     return API.RESULTS_URL + '/' + battleNumber.toString();
+  }
+
+  static getReportAbuseUrl(): string {
+    return API.REPORT_ABUSE_URL;
   }
 
   static getFormatedCookie(cookies: Object) {
@@ -23,31 +28,48 @@ export class API {
   }
 
   private readonly iksmSession: string;
-  private readonly params: URLFetchRequestOptions;
 
   constructor(iksmSession: string) {
     this.iksmSession = iksmSession;
-    this.params = this.initParams();
   }
 
-  private initParams(): URLFetchRequestOptions {
+  private getAPI(url: string): HTTPResponse {
     const cookies = { iksm_session: this.iksmSession };
     const headers = { Cookie: API.getFormatedCookie(cookies) };
-    return {
+    const params: URLFetchRequestOptions = {
       method: 'get',
       headers: headers
     };
+    return UrlFetchApp.fetch(url, params);
   }
 
-  private fetchAPI(url: string): HTTPResponse {
-    return UrlFetchApp.fetch(url, this.params);
+  public getResults(): HTTPResponse {
+    return this.getAPI(API.getResultsUrl());
   }
 
-  public fetchResults(): HTTPResponse {
-    return this.fetchAPI(API.getResultsUrl());
+  public getResult(battleNumber: number): HTTPResponse {
+    return this.getAPI(API.getResultUrl(battleNumber));
   }
 
-  public fetchResult(battleNumber: number): HTTPResponse {
-    return this.fetchAPI(API.getResultUrl(battleNumber));
+  private postAPI(url: string, payload: Object): HTTPResponse {
+    const cookies = { iksm_session: this.iksmSession };
+    const headers = { Cookie: API.getFormatedCookie(cookies) };
+    const params: URLFetchRequestOptions = {
+      method: 'post',
+      headers: headers,
+      payload: payload
+    };
+    return UrlFetchApp.fetch(url, params);
+  }
+
+  public postReportAbuse(result: any, player: any, reasonCode: string, text: string): HTTPResponse {
+    const payload = {
+      battle_number: result.battle_number,
+      reportee_nsa_id: player.principal_id,
+      battle_time: result.start_time,
+      text: text,
+      reason_code: reasonCode
+    };
+    return this.postAPI(API.getReportAbuseUrl(), payload);
   }
 }

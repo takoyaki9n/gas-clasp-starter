@@ -8,7 +8,7 @@ declare var global: any;
 global.testAPI = () => {
   const prop = PropertiesService.getScriptProperties();
   const api = new API(prop.getProperty(PropetyKeys.IKSM_SESSION));
-  const response = api.fetchResults();
+  const response = api.getResults();
   Logger.log(response.getContentText('UTF-8'));
 };
 
