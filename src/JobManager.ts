@@ -1,16 +1,10 @@
 import Folder = GoogleAppsScript.Drive.Folder;
-import File = GoogleAppsScript.Drive.File;
 import Properties = GoogleAppsScript.Properties.Properties;
 import HTTPResponse = GoogleAppsScript.URL_Fetch.HTTPResponse;
 
 import { Utils } from './Utils';
 import { API } from './API';
-
-namespace PropetyKeys {
-  export const IKSM_SESSION = 'iksm_session';
-  export const LOCK = 'lock';
-  export const LATEST = 'latest';
-}
+import { PropetyKeys } from './PropetyKeys';
 
 export class JobManager {
   private static RESULTS_FOLDER_NAME = 'results';
@@ -24,21 +18,14 @@ export class JobManager {
   constructor() {
     this.root = Utils.getScriptFolder();
     this.properties = PropertiesService.getScriptProperties();
-    this.api = this.initApi();
-    this.resultFolder = Utils.getFolder(this.root, JobManager.RESULTS_FOLDER_NAME);
-  }
-
-  private initApi() {
     const iksmSession = this.properties.getProperty(PropetyKeys.IKSM_SESSION);
-    return new API(iksmSession);
+    this.api = new API(iksmSession);
+    this.resultFolder = Utils.getFolder(this.root, JobManager.RESULTS_FOLDER_NAME);
   }
 
   private lock(): boolean {
     const lock = this.properties.getProperty(PropetyKeys.LOCK);
-    if (lock != null) {
-      console.error('Lock Failed.');
-      return false;
-    }
+    if (lock !== null) return Utils.withLog(false, 'Lock failed.');
 
     this.properties.setProperty(PropetyKeys.LOCK, Date.now().toString());
     return true;
@@ -51,9 +38,10 @@ export class JobManager {
   private getLocalLatestBattleNumber(): number {
     const latest = this.properties.getProperty(PropetyKeys.LATEST);
     var battleNumber = Number(latest);
-    if (latest != null && !isNaN(battleNumber)) return battleNumber;
+    if (latest === null || isNaN(battleNumber))
+      throw new Error(Utilities.formatString('Property latest is invalid: %s', latest));
 
-    throw new Error(Utilities.formatString('Property latest is invalid: %s', latest));
+    return battleNumber;
   }
 
   private getRemoteLatestBattleNumber(): number {
@@ -63,7 +51,7 @@ export class JobManager {
     results.sort((a, b) => {
       return b.battle_number - a.battle_number;
     });
-    return results[0].battle_number;
+    return Number(results[0].battle_number);
   }
 
   private saveResult(response: HTTPResponse, battleNumber): void {
@@ -77,23 +65,29 @@ export class JobManager {
     console.log(Utilities.formatString('Result %d is saved.', battleNumber));
   }
 
-  public run(): void {
+  private run(fun: () => void): void {
     if (!this.lock()) return;
     try {
-      const remote = this.getRemoteLatestBattleNumber();
-      const local = this.getLocalLatestBattleNumber();
-      if (remote === local) {
-        console.log('Already up to date.');
-      } else if (remote - local > JobManager.MAX_RESULTS_COUNT) {
-        console.log('Old results seemed to be lost...');
-      } else {
-        const battleNumber = local + 1;
-        const response = this.api.fetchResult(battleNumber);
-        this.saveResult(response, battleNumber);
-      }
+      fun();
     } catch (error) {
       console.error(JSON.stringify(error));
     }
     this.unlock();
+  }
+
+  public downloadResult(): void {
+    this.run(() => {
+      const remote = this.getRemoteLatestBattleNumber();
+      const local = this.getLocalLatestBattleNumber();
+
+      if (remote === local) return Utils.withLog(null, 'Already up-to-date.');
+
+      if (remote - local > JobManager.MAX_RESULTS_COUNT)
+        return Utils.withLog<null>(null, 'Old results seemed to be lost...');
+
+      const battleNumber = local + 1;
+      const response = this.api.fetchResult(battleNumber);
+      this.saveResult(response, battleNumber);
+    });
   }
 }

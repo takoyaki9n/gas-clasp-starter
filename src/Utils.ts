@@ -34,4 +34,9 @@ export class Utils {
   ): void {
     while (iterator.hasNext()) fun(iterator.next());
   }
+
+  public static withLog<T>(v: T, message?: any) {
+    console.log(message);
+    return v;
+  }
 }
