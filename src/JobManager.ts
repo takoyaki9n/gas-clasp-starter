@@ -63,19 +63,20 @@ export class JobManager {
       return member.game_paint_point === 0;
     });
     reportee.forEach(member => {
-      this.api.postReportAbuse(
+      const reportResponse = this.api.postReportAbuse(
         result,
         member.player,
         JobManager.RESON_CODE_DISCONNECTION,
         JobManager.TEXT_DISCONNECTION
       );
-      console.log(
-        Utilities.formatString(
+      if (reportResponse.getResponseCode() === 204) {
+        const message = Utilities.formatString(
           'Disconnection reported: buttle_number=%s, nickname=%s',
-          result.buttle_number,
+          result.battle_number,
           member.player.nickname
-        )
-      );
+        );
+        console.log(message);
+      }
     });
   }
 
@@ -113,6 +114,7 @@ export class JobManager {
       const battleNumber = local + 1;
       const response = this.api.getResult(battleNumber);
       this.saveResult(response, battleNumber);
+      this.reportDisconnection(response);
     });
   }
 }

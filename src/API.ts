@@ -53,7 +53,10 @@ export class API {
 
   private postAPI(url: string, payload: Object): HTTPResponse {
     const cookies = { iksm_session: this.iksmSession };
-    const headers = { Cookie: API.getFormatedCookie(cookies) };
+    const headers = {
+      Cookie: API.getFormatedCookie(cookies),
+      'x-requested-with': 'XMLHttpRequest'
+    };
     const params: URLFetchRequestOptions = {
       method: 'post',
       headers: headers,
